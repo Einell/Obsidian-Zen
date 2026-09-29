@@ -131,15 +131,22 @@ export default class ZenModePlugin extends Plugin {
 		return row instanceof HTMLElement ? row : null;
 	}
 
+	private lastTabHeader(row: HTMLElement): HTMLElement | null {
+		const tabs = row.querySelectorAll(':scope > .workspace-tab-header');
+		if (tabs.length === 0) {
+			return null;
+		}
+		const last = tabs[tabs.length - 1];
+		return last instanceof HTMLElement ? last : null;
+	}
+
 	private ensureButton(): void {
 		const bookmark = this.bookmarkTab();
 		const row = bookmark?.parentElement ?? this.leftTabRow();
 		if (!row) {
 			return;
 		}
-		const anchor =
-			bookmark ??
-			row.querySelector(':scope > .workspace-tab-header:last-of-type');
+		const anchor = bookmark ?? this.lastTabHeader(row);
 		const placed =
 			this.buttonEl?.isConnected &&
 			this.buttonEl.parentElement === row &&
