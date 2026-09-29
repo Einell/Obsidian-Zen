@@ -482,6 +482,13 @@ export default class ZenModePlugin extends Plugin {
 		for (const view of views) {
 			this.clearMarks(view);
 		}
+
+		try {
+			this.chrome.exit();
+		} finally {
+			this.syncButtonState();
+		}
+
 		for (const view of views) {
 			for (const entry of saved) {
 				const item = view.fileItems[entry.path];
@@ -491,7 +498,5 @@ export default class ZenModePlugin extends Plugin {
 			}
 			view.tree?.infinityScroll?.queueCompute?.();
 		}
-		this.chrome.exit();
-		this.syncButtonState();
 	}
 }
