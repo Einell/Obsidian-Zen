@@ -37,8 +37,21 @@
 	border-inline-start: none;
 }
 
-body.zen-mode-chrome .workspace-ribbon,
+body.zen-mode-chrome .workspace-ribbon.mod-left,
 body.zen-mode-chrome .status-bar,
-body.zen-mode-chrome .mod-root .workspace-tab-header-container {
+body.zen-mode-chrome .mod-root .workspace-tab-header-container-inner,
+body.zen-mode-chrome .mod-root .workspace-tab-header-new-tab,
+body.zen-mode-chrome .mod-root .workspace-tab-header-tab-list,
+body.zen-mode-chrome .mod-root .workspace-tab-header-container:not(:has(.sidebar-toggle-button.mod-right)) {
 	display: none !important;
+}
+
+body.zen-mode-chrome .mod-root .view-header {
+	-webkit-app-region: drag;
+}
+
+body.zen-mode-chrome .mod-root .view-header .clickable-icon,
+body.zen-mode-chrome .mod-root .view-header button,
+body.zen-mode-chrome .mod-root .view-header input {
+	-webkit-app-region: no-drag;
 }

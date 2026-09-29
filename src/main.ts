@@ -57,11 +57,14 @@ export default class ZenModePlugin extends Plugin {
 	private decorateAgain = false;
 	private layoutQueued = false;
 	private observer: MutationObserver | null = null;
+	private tabRowObserver: MutationObserver | null = null;
+	private tabRowRoot: HTMLElement | null = null;
+	private ensureQueued = false;
 
 	onload(): void {
 		this.registerEvent(
 			this.app.workspace.on('layout-change', () => {
-				this.ensureButton();
+				this.queueEnsureButton();
 				if (!this.active) {
 					return;
 				}
@@ -100,14 +103,61 @@ export default class ZenModePlugin extends Plugin {
 		);
 
 		this.app.workspace.onLayoutReady(() => {
-			this.ensureButton();
+			this.queueEnsureButton();
 		});
 	}
 
 	onunload(): void {
+		this.tabRowObserver?.disconnect();
+		this.tabRowObserver = null;
+		this.tabRowRoot = null;
 		void this.exit();
 		this.buttonEl?.remove();
 		this.buttonEl = null;
+	}
+
+	private mainDocument(): Document {
+		return this.app.workspace.containerEl.ownerDocument;
+	}
+
+	private queueEnsureButton(): void {
+		if (this.ensureQueued) {
+			return;
+		}
+		this.ensureQueued = true;
+		const view = this.mainDocument().defaultView;
+		if (!view) {
+			this.ensureQueued = false;
+			return;
+		}
+		view.requestAnimationFrame(() => {
+			this.ensureQueued = false;
+			this.ensureButton();
+			this.watchTabRow();
+		});
+	}
+
+	private watchTabRow(): void {
+		const split = this.app.workspace.containerEl.querySelector('.mod-left-split');
+		if (!(split instanceof HTMLElement)) {
+			return;
+		}
+		if (this.tabRowRoot === split && this.tabRowObserver) {
+			return;
+		}
+		this.tabRowObserver?.disconnect();
+		this.tabRowRoot = split;
+		this.tabRowObserver = new MutationObserver(() => {
+			if (!this.buttonIsInRow()) {
+				this.queueEnsureButton();
+			}
+		});
+		this.tabRowObserver.observe(split, { childList: true, subtree: true });
+	}
+
+	private buttonIsInRow(): boolean {
+		const row = this.leftTabRow();
+		return this.buttonEl?.isConnected === true && this.buttonEl.parentElement === row;
 	}
 
 	private bookmarkTab(): HTMLElement | null {
@@ -118,14 +168,14 @@ export default class ZenModePlugin extends Plugin {
 		if (header instanceof HTMLElement && header.isConnected) {
 			return header;
 		}
-		const fallback = activeDocument.querySelector(
+		const fallback = this.mainDocument().querySelector(
 			'.mod-left-split .workspace-tab-header[aria-label="书签"], .mod-left-split .workspace-tab-header[aria-label="Bookmarks"]',
 		);
 		return fallback instanceof HTMLElement ? fallback : null;
 	}
 
 	private leftTabRow(): HTMLElement | null {
-		const row = activeDocument.querySelector(
+		const row = this.mainDocument().querySelector(
 			'.mod-left-split .workspace-tab-header-container-inner',
 		);
 		return row instanceof HTMLElement ? row : null;

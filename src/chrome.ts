@@ -16,7 +16,6 @@ interface WorkspaceWithDocks {
 export class ChromeController {
 	private engaged = false;
 	private leftCollapsed = false;
-	private rightCollapsed = false;
 	private temporaryLeft = false;
 
 	constructor(private readonly app: App) {}
@@ -27,13 +26,10 @@ export class ChromeController {
 			return;
 		}
 		const left = this.dock('leftSplit');
-		const right = this.dock('rightSplit');
 		this.leftCollapsed = left?.collapsed ?? false;
-		this.rightCollapsed = right?.collapsed ?? false;
 		this.engaged = true;
 		this.reapply();
 		left?.collapse();
-		right?.collapse();
 	}
 
 	exit(): void {
@@ -44,7 +40,6 @@ export class ChromeController {
 		this.temporaryLeft = false;
 		this.body()?.classList.remove('zen-mode-chrome');
 		this.restore('leftSplit', this.leftCollapsed);
-		this.restore('rightSplit', this.rightCollapsed);
 	}
 
 	reapply(): void {
