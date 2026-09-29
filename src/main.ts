@@ -49,6 +49,7 @@ function asFileExplorerView(view: WorkspaceLeaf['view']): FileExplorerView | nul
 export default class ZenModePlugin extends Plugin {
 	private readonly chrome = new ChromeController(this.app);
 	private buttonEl: HTMLElement | null = null;
+	private active = false;
 	private focusPath: string | null = null;
 	private collapseRecorded = false;
 	private savedCollapsed: SavedCollapse[] = [];
@@ -61,6 +62,9 @@ export default class ZenModePlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on('layout-change', () => {
 				this.ensureButton();
+				if (!this.active) {
+					return;
+				}
 				this.chrome.reapply();
 				if (this.focusPath !== null) {
 					void this.decorateAll();
@@ -148,13 +152,12 @@ export default class ZenModePlugin extends Plugin {
 	}
 
 	private syncButtonState(): void {
-		const active = this.focusPath !== null;
-		this.buttonEl?.classList.toggle('is-active', active);
-		this.buttonEl?.setAttribute('aria-pressed', active ? 'true' : 'false');
+		this.buttonEl?.classList.toggle('is-active', this.active);
+		this.buttonEl?.setAttribute('aria-pressed', this.active ? 'true' : 'false');
 	}
 
 	private async toggle(): Promise<void> {
-		if (this.focusPath !== null) {
+		if (this.active) {
 			await this.exit();
 			return;
 		}
@@ -163,23 +166,25 @@ export default class ZenModePlugin extends Plugin {
 		if (!folder) {
 			return;
 		}
-		if (folder.isRoot()) {
-			new Notice('当前在库根目录，无法聚焦单一文件夹');
+
+		this.active = true;
+		if (!folder.isRoot() && this.explorerViews().length > 0) {
+			this.focusPath = folder.path;
+			this.collapseRecorded = false;
+			this.savedCollapsed = [];
+			this.layoutQueued = false;
+
+			const leaf = this.fileExplorerLeaf();
+			if (leaf) {
+				await this.app.workspace.revealLeaf(leaf);
+			}
+			await this.decorateAll();
+			this.watchExplorer();
+		}
+		if (!this.active) {
 			return;
 		}
-
-		this.focusPath = folder.path;
-		this.collapseRecorded = false;
-		this.savedCollapsed = [];
-		this.layoutQueued = false;
-
-		const leaf = this.fileExplorerLeaf();
-		if (leaf) {
-			await this.app.workspace.revealLeaf(leaf);
-		}
-		await this.decorateAll();
 		this.chrome.enter();
-		this.watchExplorer();
 		this.syncButtonState();
 	}
 
@@ -398,6 +403,7 @@ export default class ZenModePlugin extends Plugin {
 	}
 
 	private async exit(): Promise<void> {
+		this.active = false;
 		const saved = this.savedCollapsed;
 		this.focusPath = null;
 		this.collapseRecorded = false;
