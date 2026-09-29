@@ -15,4 +15,5 @@ jobs:
       - name: Publish 1.0.0
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit 1.0.0 --draft=false
+          GH_REPO: Einell/Obsidian-Zen
+        run: gh release edit 1.0.0 --repo Einell/Obsidian-Zen --draft=false
