@@ -82,6 +82,15 @@ export default class ZenModePlugin extends Plugin {
 			this.app.vault.on('rename', (file, oldPath) => this.onRename(file, oldPath)),
 		);
 
+		this.registerDomEvent(
+			this.app.workspace.containerEl,
+			'keydown',
+			(event) => {
+				this.onEscape(event);
+			},
+			true,
+		);
+
 		this.app.workspace.onLayoutReady(() => {
 			this.ensureButton();
 		});
@@ -400,6 +409,28 @@ export default class ZenModePlugin extends Plugin {
 			return;
 		}
 		void this.decorateAll();
+	}
+
+	private onEscape(event: KeyboardEvent): void {
+		if (!this.active || event.key !== 'Escape' || event.repeat) {
+			return;
+		}
+		if (this.escapeIsTaken()) {
+			return;
+		}
+		event.preventDefault();
+		event.stopPropagation();
+		void this.exit();
+	}
+
+	private escapeIsTaken(): boolean {
+		const doc = this.app.workspace.containerEl.ownerDocument;
+		for (const node of Array.from(doc.querySelectorAll('.modal-container, .prompt, .menu'))) {
+			if (node instanceof HTMLElement && node.getClientRects().length > 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private async exit(): Promise<void> {
