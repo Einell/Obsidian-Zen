@@ -1,5 +1,7 @@
 import { type App, type Workspace } from 'obsidian';
 
+const LEFT_EDGE_PX = 12;
+
 interface WorkspaceSidedock {
 	collapsed: boolean;
 	collapse: () => void;
@@ -15,6 +17,7 @@ export class ChromeController {
 	private engaged = false;
 	private leftCollapsed = false;
 	private rightCollapsed = false;
+	private temporaryLeft = false;
 
 	constructor(private readonly app: App) {}
 
@@ -38,6 +41,7 @@ export class ChromeController {
 			return;
 		}
 		this.engaged = false;
+		this.temporaryLeft = false;
 		this.body()?.classList.remove('zen-mode-chrome');
 		this.restore('leftSplit', this.leftCollapsed);
 		this.restore('rightSplit', this.rightCollapsed);
@@ -48,6 +52,52 @@ export class ChromeController {
 			return;
 		}
 		this.body()?.classList.add('zen-mode-chrome');
+	}
+
+	onPointerMove(event: PointerEvent): void {
+		if (!this.engaged) {
+			return;
+		}
+		const container = this.app.workspace.containerEl;
+		const bounds = container.getBoundingClientRect();
+		const x = event.clientX - bounds.left;
+		const inStrip = x >= 0 && x < LEFT_EDGE_PX;
+		const sidebar = container.querySelector('.mod-left-split');
+		const inSidebar =
+			sidebar instanceof HTMLElement &&
+			event.target instanceof Node &&
+			sidebar.contains(event.target);
+		if (inStrip || inSidebar) {
+			this.revealLeft();
+			return;
+		}
+		this.hideTemporaryLeft();
+	}
+
+	private revealLeft(): void {
+		const left = this.dock('leftSplit');
+		if (!left) {
+			return;
+		}
+		if (!left.collapsed) {
+			this.temporaryLeft = true;
+			return;
+		}
+		left.expand();
+		if (!left.collapsed) {
+			this.temporaryLeft = true;
+		}
+	}
+
+	private hideTemporaryLeft(): void {
+		if (!this.temporaryLeft) {
+			return;
+		}
+		const left = this.dock('leftSplit');
+		this.temporaryLeft = false;
+		if (left && !left.collapsed) {
+			left.collapse();
+		}
 	}
 
 	private body(): HTMLElement | null {

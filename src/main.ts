@@ -90,6 +90,14 @@ export default class ZenModePlugin extends Plugin {
 			},
 			true,
 		);
+		this.registerDomEvent(
+			this.app.workspace.containerEl,
+			'pointermove',
+			(event) => {
+				this.chrome.onPointerMove(event);
+			},
+			true,
+		);
 
 		this.app.workspace.onLayoutReady(() => {
 			this.ensureButton();
