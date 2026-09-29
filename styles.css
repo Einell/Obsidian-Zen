@@ -1,0 +1,38 @@
+.mod-left-split .workspace-tab-header-container-inner > .zen-mode-toggle {
+	-webkit-app-region: no-drag;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	align-self: center;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	border-radius: var(--tab-radius);
+	corner-shape: var(--corner-shape);
+	color: var(--icon-color);
+	background-color: transparent;
+	font-size: var(--font-ui-small);
+	line-height: 1;
+	text-align: center;
+}
+
+.mod-left-split .workspace-tab-header-container-inner > .zen-mode-toggle.is-active,
+.mod-left-split .workspace-tab-header-container-inner > .zen-mode-toggle.is-active:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--icon-color);
+}
+
+.nav-files-container.zen-mode-active .zen-hidden {
+	display: none !important;
+}
+
+.nav-files-container.zen-mode-active .zen-ancestor > .nav-folder-title {
+	display: none;
+}
+
+.nav-files-container.zen-mode-active .zen-ancestor > .nav-folder-children {
+	padding-inline-start: 0;
+	margin-inline-start: 0;
+	border-inline-start: none;
+}

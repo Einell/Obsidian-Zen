@@ -1,0 +1,10 @@
+{
+	"id": "zen-mode",
+	"name": "禅模式",
+	"version": "1.0.0",
+	"minAppVersion": "1.7.2",
+	"description": "在文件列表中聚焦当前文件夹并隐藏其他目录。",
+	"author": "",
+	"authorUrl": "",
+	"isDesktopOnly": false
+}
