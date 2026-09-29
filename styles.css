@@ -36,3 +36,9 @@
 	margin-inline-start: 0;
 	border-inline-start: none;
 }
+
+body.zen-mode-chrome .workspace-ribbon,
+body.zen-mode-chrome .status-bar,
+body.zen-mode-chrome .mod-root .workspace-tab-header-container {
+	display: none !important;
+}

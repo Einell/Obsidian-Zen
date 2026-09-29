@@ -1,5 +1,7 @@
 import { Notice, Plugin, TAbstractFile, TFolder, type WorkspaceLeaf } from 'obsidian';
 
+import { ChromeController } from './chrome';
+
 interface ExplorerItemInfo {
 	hidden: boolean;
 	height: number;
@@ -45,6 +47,7 @@ function asFileExplorerView(view: WorkspaceLeaf['view']): FileExplorerView | nul
 }
 
 export default class ZenModePlugin extends Plugin {
+	private readonly chrome = new ChromeController(this.app);
 	private buttonEl: HTMLElement | null = null;
 	private focusPath: string | null = null;
 	private collapseRecorded = false;
@@ -58,6 +61,7 @@ export default class ZenModePlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on('layout-change', () => {
 				this.ensureButton();
+				this.chrome.reapply();
 				if (this.focusPath !== null) {
 					void this.decorateAll();
 					this.watchExplorer();
@@ -174,6 +178,7 @@ export default class ZenModePlugin extends Plugin {
 			await this.app.workspace.revealLeaf(leaf);
 		}
 		await this.decorateAll();
+		this.chrome.enter();
 		this.watchExplorer();
 		this.syncButtonState();
 	}
@@ -414,6 +419,7 @@ export default class ZenModePlugin extends Plugin {
 			}
 			view.tree?.infinityScroll?.queueCompute?.();
 		}
+		this.chrome.exit();
 		this.syncButtonState();
 	}
 }
