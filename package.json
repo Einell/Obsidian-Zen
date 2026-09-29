@@ -1,7 +1,7 @@
 {
 	"name": "zen-mode",
 	"version": "1.0.0",
-	"description": "在文件列表中聚焦当前文件夹并隐藏其他目录。",
+	"description": "进入禅模式时聚焦当前文件夹，并收起侧栏、功能区、笔记标签和状态栏。",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
