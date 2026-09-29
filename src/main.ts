@@ -124,24 +124,38 @@ export default class ZenModePlugin extends Plugin {
 		return fallback instanceof HTMLElement ? fallback : null;
 	}
 
+	private leftTabRow(): HTMLElement | null {
+		const row = activeDocument.querySelector(
+			'.mod-left-split .workspace-tab-header-container-inner',
+		);
+		return row instanceof HTMLElement ? row : null;
+	}
+
 	private ensureButton(): void {
 		const bookmark = this.bookmarkTab();
-		if (!bookmark) {
+		const row = bookmark?.parentElement ?? this.leftTabRow();
+		if (!row) {
 			return;
 		}
-		if (this.buttonEl?.isConnected && this.buttonEl.previousElementSibling === bookmark) {
-			this.syncButtonSize(bookmark);
+		const anchor =
+			bookmark ??
+			row.querySelector(':scope > .workspace-tab-header:last-of-type');
+		const placed =
+			this.buttonEl?.isConnected &&
+			this.buttonEl.parentElement === row &&
+			(anchor
+				? this.buttonEl.previousElementSibling === anchor
+				: this.buttonEl.parentElement === row);
+		if (placed) {
+			if (anchor instanceof HTMLElement) {
+				this.syncButtonSize(anchor);
+			}
 			this.syncButtonState();
 			return;
 		}
 
-		const parent = bookmark.parentElement;
-		if (!parent) {
-			return;
-		}
-
 		this.buttonEl?.remove();
-		const button = parent.createDiv({
+		const button = row.createDiv({
 			cls: 'zen-mode-toggle clickable-icon',
 			text: '禅',
 		});
@@ -153,9 +167,15 @@ export default class ZenModePlugin extends Plugin {
 			event.stopPropagation();
 			void this.toggle();
 		});
-		bookmark.insertAdjacentElement('afterend', button);
+		if (anchor instanceof HTMLElement) {
+			anchor.insertAdjacentElement('afterend', button);
+		} else {
+			row.append(button);
+		}
 		this.buttonEl = button;
-		this.syncButtonSize(bookmark);
+		if (anchor instanceof HTMLElement) {
+			this.syncButtonSize(anchor);
+		}
 		this.syncButtonState();
 	}
 
