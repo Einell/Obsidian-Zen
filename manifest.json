@@ -1,9 +1,9 @@
 {
 	"id": "zen-mode",
 	"name": "禅模式",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"minAppVersion": "1.7.2",
-	"description": "进入禅模式时聚焦当前文件夹，并收起侧栏、功能区、笔记标签和状态栏。",
+	"description": "进入禅模式时聚焦当前文件夹，并收起左栏、功能区、笔记标签和状态栏。",
 	"author": "",
 	"authorUrl": "",
 	"isDesktopOnly": false
